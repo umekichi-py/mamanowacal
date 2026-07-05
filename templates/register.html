@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet"
+     href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <title>ユーザー登録</title>
+</head>
+
+<body class="section">
+
+    <div class="container" style="max-width: 500px;">
+        <div class="card">
+            <header class="card-header has-background-primary">
+                <p class="card-header-title has-text-white">
+                    新規ユーザー登録（管理者専用）
+                </p>
+            </header>
+
+            <div class="card-content">
+                <form method="POST">
+
+                    <div class="field">
+                        <label class="label">ユーザー名</label>
+                        <div class="control">
+                            <input class="input"
+                                   type="text"
+                                   name="username"
+                                   placeholder="ユーザー名を入力"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">パスワード</label>
+                        <div class="control">
+                            <input class="input"
+                                   type="password"
+                                   name="password"
+                                   placeholder="パスワードを入力"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">属性</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="role" id="role-select">
+                                    <option value="user">職員</option>
+                                    <option value="withchild">職員（預けあり）</option>
+                                    <option value="childonly">園児親</option>
+                                    <option value="admin">管理者</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 職員情報 -->
+                    <div class="field" id="job-select">
+                        <label class="label">職種</label>
+                        <div class="select">
+                            <select name="job">
+                                <option value="育">保育士</option>
+                                <option value="看">看護師</option>
+                                <option value="援">支援員</option>
+                                <option value="給">給食</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field" id="staff-fields">
+                        <label class="label">職員番号</label>
+                        <input class="input"
+                               type="text"
+                               name="staff_id"
+                               pattern="\d{6}"
+                               maxlength="6"
+                               inputmode="numeric"
+                               placeholder="半角数字6桁"
+                               >
+                    </div>
+
+                    <!-- 園児情報 -->
+                    <div class="field" id="child-fields">
+                        <label class="label">園児名</label>
+                        <input class="input" type="text" name="child_name">
+                    </div>
+
+                    <div class="field is-grouped is-justify-content-space-between mt-5">
+                        <div class="control">
+                            <button class="button is-primary">
+                                登録する
+                            </button>
+                        </div>
+
+                        <div class="control">
+                            <a href="{{ url_for('admin_page') }}"
+                               class="button is-light">
+                                戻る
+                            </a>
+                        </div>
+                    </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="notification is-danger">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const roleSelect = document.getElementById("role-select");
+        const jobSelect = document.getElementById("job-select");
+        const staffnumFields = document.getElementById("staff-fields");
+        const childFields = document.getElementById("child-fields");
+
+        function updateFields() {
+            const role = roleSelect.value;
+
+            // まずは全部隠す
+            jobSelect.classList.add("is-hidden");
+            staffnumFields.classList.add("is-hidden");
+            childFields.classList.add("is-hidden");
+
+            // 職員系
+            if (role === "user" || role === "withchild") {
+                staffnumFields.classList.remove("is-hidden");
+                jobSelect.classList.remove("is-hidden");
+            }
+
+            // 子ども関連
+            if (role === "childonly" || role === "withchild") {
+                childFields.classList.remove("is-hidden");
+            }
+        }
+
+        // 初期表示
+        updateFields()
+
+        // 変更時
+        roleSelect.addEventListener("change", updateFields);
+    });
+</script>

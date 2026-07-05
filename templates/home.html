@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet"
+     href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <title>カレンダー選択</title>
+</head>
+
+<body>
+    <!-- ヘッダー -->
+    <section class="hero is-primary is-medium">
+        <div class="hero-body has-text-centered">
+            <h1>ようこそ {{ username }}さん</h1>
+            <p class="title">
+                カレンダー選択
+            </p>
+            <p class="subtitle">
+                使用するカレンダーを選んでください
+            </p>
+        </div>
+    </section>
+
+    <div class="m-3 has-text-right">
+        <a href="{{ url_for('logout') }}">ログアウト</a>
+        <a href="{{ url_for('change_password') }}">パスワード変更</a>
+    </div>
+
+
+    <!-- 選択ボタン -->
+    <section class="section">
+        <div class="container">
+            <div class="columns is-centered">
+
+                {% if role in ["user", "withchild", "admin"] %}
+                <!-- カレンダー1 -->
+                <div class="column is-4">
+                    <div class="card">
+                        <div class="card-content has-text-centered">
+                            <p class="title is-4">休み希望用</p>
+                            <p class="content">
+                                休み希望を提出するカレンダー
+                            </p>
+                            <a href="{{ url_for('index_get', mode='holiday') }}" 
+                               class="button is-danger is-fullwidth">
+                               開く
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- カレンダー2 -->
+                <div class="column is-4">
+                    <div class="card">
+                        <div class="card-content has-text-centered">
+                            <p class="title is-4">出勤希望用</p>
+                            <p class="content">
+                                出勤可能日を提出するカレンダー
+                            </p>
+                            <a href="{{ url_for('index_get', mode='workday') }}" 
+                               class="button is-info is-fullwidth">
+                               開く
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- カレンダー3 -->
+                {% if role in ["withchild", "childonly", "admin"] %}
+                <div class="column is-4">
+                    <div class="card">
+                        <div class="card-content has-text-centered">
+                            <p class="title is-4">子ども預け希望</p>
+                            <p class="content">
+                                子どもの預かり希望を提出するカレンダー
+                            </p>
+                            <a href="{{ url_for('index_get', mode='childday') }}" 
+                               class="button is-success is-fullwidth">
+                               開く
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </section>
+
+    <div class="m-3 has-text-right">
+        {% if session.get('role') == 'admin' %}
+            <a href="{{ url_for('admin_page') }}" class="button is-dark">管理者ページ</a>
+        {% endif %}
+    </div>
+
+</body>
+</html>

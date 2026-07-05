@@ -1,0 +1,48 @@
+<form method="POST">
+
+    <div class="field">
+        <label>ユーザー名</label>
+        <input class="input" value="{{ username }}" disabled>
+    </div>
+
+    <div class="field">
+        <label>職員番号</label>
+        <input class="input" name="staff_id" value="{{ user.staff_id }}">
+    </div>
+
+    <div class="field">
+        <label>職種</label>
+        <div class="select">
+            <select name="job">
+                <option value="育" {% if user.job=="育" %}selected{% endif %}>保育士</option>
+                <option value="看" {% if user.job=="看" %}selected{% endif %}>看護師</option>
+                <option value="援" {% if user.job=="援" %}selected{% endif %}>支援員</option>
+                <option value="給" {% if user.job=="給" %}selected{% endif %}>給食</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="field">
+        <label>園児名</label>
+        <input class="input" name="child_name" value="{{ user.child_name }}">
+    </div>
+
+    <div class="field">
+        <label>ロール</label>
+        <div class="select">
+            <select name="role">
+                <option value="user" {% if user.role=="user" %}selected{% endif %}>職員</option>
+                <option value="withchild" {% if user.role=="withchild" %}selected{% endif %}>職員（預けあり）</option>
+                <option value="childonly" {% if user.role=="childonly" %}selected{% endif %}>園児親</option>
+                <option value="admin" {% if user.role=="admin" %}selected{% endif %}>管理者</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="button is-primary">更新</button>
+
+    <a href="{{ url_for('admin_page') }}" class="button is-light">
+        戻る
+    </a>
+
+</form>

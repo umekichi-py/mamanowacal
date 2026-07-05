@@ -1,0 +1,20 @@
+{
+  "植田": {
+    "password": "scrypt:32768:8:1$GsmYu4yYwvCJN5rL$be1eab60ea93f434d0135195c3855711d7a3cfcc316c351b2191db0646ed8a95b298e9ce2afc924e61f005cde9720da6392a6c7bca8e535ab863c7b8ce475f1e",
+    "role": "user",
+    "staff_id": "001001",
+    "job": "育",
+    "child_name": ""
+  },
+  "admin": {
+    "password": "scrypt:32768:8:1$E2iBrveGvUaCmscT$f5ef3c33175f8a71402bb32de91bfb381f2f74cd0a5af963c6291024a0323b39bfbb563b821d7a19f57d484f3f89af15e2f492a1563670efa9e4e771d5127d13",
+    "role": "admin"
+  },
+  "藤原": {
+    "password": "scrypt:32768:8:1$3q9VKBS7MzLHPV3Z$8d82b8049d03413bfff8fc2a0ce4a0656ce0de2a26d062789d4eec6782338216a56b11bc4f64871b6fdd2e565e28d302d201425c18a9c07c51d142d22e998013",
+    "role": "withchild",
+    "staff_id": "001004",
+    "job": "育",
+    "child_name": "おと・ゆたか"
+  }
+}

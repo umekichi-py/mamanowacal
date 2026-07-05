@@ -1,0 +1,90 @@
+<style>
+    .schedule{
+        display:grid;
+        grid-template-columns: 60px 1fr;
+        grid-template-rows: auto auto;
+        gap:2px;
+        font-size:0.8rem;
+    }
+    .timeS{
+        grid-column:1;
+        grid-row:1;
+    }
+    .timeE{
+        grid-column:1;
+        grid-row:2;
+    }
+    .comment{
+        grid-column:2;
+        grid-row:1 / span 2;
+    }
+
+    table{
+        border-collapse: collapse;
+    }
+    th{
+        border:1px solid #666;
+        background:#f5f5f5;
+        min-width: 120px;
+    }
+    td{
+        border:1px solid #ccc
+    }
+    .table-container{
+        overflow-x: auto;
+        width: 100%;
+        min-width: 120px;
+    }
+</style>
+
+<div class="m-3">
+    <a href="{{ url_for('admin_calendar') }}" class="button is-light">
+        ←月選択に戻る
+    </a>
+    <a href="{{ url_for('export_calendar', mode=mode, month='%04d-%02d' % (year, month)) }}"
+    class="button is-success">
+        Excel出力
+    </a>
+</div>
+
+<div class="table-container">
+    <table class="table is-bordered">
+
+        <thead>
+
+            <tr>
+
+                <th>日付</th>
+
+                {% for username, user in users_sorted %}
+                <th>{{ user.job or "" }}{{ user.staff_id or "" }}{{ username }}</th>
+                {% endfor %}
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+            {% for date, row in table.items() %}
+            <tr>
+                <td>{{ date }}</td>
+
+                {% for username, user in users_sorted %}
+                <td>
+                    {% set d = row[username] %}
+                    {% if d %}
+                    <div class="schedule">
+                        <div class="timeS">{{ d.timeS }}</div>
+                        <div class="comment">{{ d.comment }}</div>
+                        <div class="timeE">{{ d.timeE }}</div>
+                    </div>
+                    {% endif %}
+                </td>
+                {% endfor %}
+
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>

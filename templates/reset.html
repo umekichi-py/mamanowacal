@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+</head>
+
+<body>
+
+<section class="hero is-danger">
+<div class="hero-body has-text-centered">
+<p class="title">パスワードリセット</p>
+<p>{{ username }}</p>
+</div>
+</section>
+
+<section class="section">
+<div class="container" style="max-width:400px">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category, message in messages %}
+<div class="notification is-{{ category }}">
+{{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<form method="POST">
+
+<div class="m-3 field">
+<label class="label">新しい仮パスワード</label>
+<input class="input" type="password" name="temp_pw" required>
+</div>
+
+<button class="m-3 button is-danger is-fullwidth">パスワードリセット</button>
+
+</form>
+
+<div class="m-3 has-text-left">
+    <a href="{{ url_for('admin_page') }}" class="button is-warning">一覧に戻る</a>
+    <a href="{{ url_for('home') }}" class="button is-warning">ホームに戻る</a>
+</div>
+
+</div>
+</section>
+</body>
+</html>

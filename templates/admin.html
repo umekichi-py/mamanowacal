@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet"
+        href = "https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+        <title>管理者ページ</title>
+    </head>
+
+<body>
+
+    <section class="hero is-dark">
+        <div class="hero-body has-text-centered">
+            <p class="title">管理者ページ</p>
+        </div>
+    </section>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+    {% for category, message in messages %}
+        <div class="notification is-{{ category }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+{% endwith %}
+
+    <section class="section">
+        <div class="container">
+
+            <table class="table is-striped is-fullwidth">
+
+                <thead>
+                    <tr>
+                        <th>ユーザー名</th>
+                        <th>属性</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for username, data in users.items() %}
+
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('edit_user', username=username) }}">
+                                {{ username }}
+                            </a>
+                        </td>
+                        <td>
+                            <form action="{{ url_for('toggle_role', username=username) }}" method="post">
+                                
+                                <button class="button is-small
+                                {% if data.role =='user' %}
+                                is-info
+                                {% elif data.role == 'withchild' %}
+                                is-success
+                                {% elif data.role == 'childonly' %}
+                                is-warning
+                                {% elif data.role == 'admin' %}
+                                is-danger
+                                {% endif %}
+                                ">
+
+                                {{ data.role }}
+
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('reset', username=username) }}"
+                            class="button is-danger is-small">パスワードリセット</a>
+                            
+                            {% if username != "admin" %}
+                            <form action="{{ url_for('delete_user', username=username) }}"
+                            method="post" style="display:inline;">
+
+                            <button class="button is-warning is-small"
+                            onclick="return confirm('{{ username }}を本当に削除しますか？')";>
+                        
+                            削除
+
+                            </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+            
+            <div class="m-3">
+                <p>
+                    ユーザー名をクリックするとユーザー情報編集ページが開きます。<br>
+                    属性をクリックすると、<br>user（職員）-withchild（職員預けあり）-childonly（園児親）-admin（管理者）-user<br>の順に属性が変わります。
+                </p>
+            </div>
+            
+            <div class="m-3">
+                <a href="{{url_for('register') }}" class="button is-warning">ユーザー登録</a>
+                <a href="{{ url_for('admin_calendar') }}" class="button is-info">カレンダー一覧</a>
+                <a href="{{ url_for('home') }}" class="button">ホームに戻る</a>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+</html>
