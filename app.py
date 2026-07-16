@@ -5,15 +5,21 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 import io
-from supabase import create_client
+from user_repository import UserRepository
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_KEY"]
-
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+repo = UserRepository()
 
 #admin作成
 def init_admin():
+
+    if repo.get_user("admin") is None:
+
+        repo.create_user(
+            username="admin",
+            password=generate_password_hash("mamanowa"),
+            role="admin"
+        )
+'''
     users = load_users()
 
     if "admin" not in users:
@@ -23,6 +29,7 @@ def init_admin():
         }
         save_users(users)
         print("管理者アカウント作成:admin / admin123")
+'''
 
 #予定イベントの保存先
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -41,11 +48,17 @@ def get_user_file():
     return os.path.join(SCRIPT_DIR, "users.json")
 
 def load_users():
+
+    #supabase用コード
+    return repo.get_all_users()
+
+'''
     file = get_user_file()
     if os.path.exists(file):
         with open(file, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
+'''
 
 def save_users(users):
     with open(get_user_file(), "w", encoding="utf-8") as f:
