@@ -43,6 +43,7 @@ class UserRepository:
         supabase.table("users").insert({
             "username": username,
             "password": password,
+            "role": role,
             "staff_id": staff_id,
             "job": job,
             "child_name": child_name
