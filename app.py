@@ -91,15 +91,31 @@ def register():
         if not username or not password:
             flash("未入力があります。", "error")
             return render_template("register.html")
+        
+        if repo.get_user(username):
+            flash("登録済みです", "error")
+            return render_template("register.html")
 
+        """
         users = load_users()
 
         if username in users:
             flash("登録済みです。", "error")
             return render_template("register.html")
-        
+        """
+
         hashed_pw = generate_password_hash(password)
 
+        repo.create_user(
+            username=username,
+            password=hashed_pw,
+            role=role,
+            staff_id=staff_id,
+            job=job,
+            child_name=child_name
+        )
+
+        '''
         users[username] = {
             "password": hashed_pw,
             "role": role,
@@ -107,8 +123,7 @@ def register():
             "job": job,
             "child_name": child_name
         }
-
-        save_users(users)
+        '''
 
         flash("ユーザー登録が完了しました。", "success")
         return render_template("register.html")
