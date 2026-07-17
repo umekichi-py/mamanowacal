@@ -4,6 +4,9 @@ from supabase import create_client
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_SECRET_KEY = os.environ["SUPABASE_SECRET_KEY"]
 
+print(SUPABASE_URL)
+print(SUPABASE_SECRET_KEY[:20])
+
 supabase = create_client(SUPABASE_URL, SUPABASE_SECRET_KEY)
 
 class UserRepository:
