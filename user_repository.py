@@ -51,3 +51,37 @@ class UserRepository:
             "job": job,
             "child_name": child_name
         }).execute()
+
+    def update_user(self, username, password=None, role=None,
+                    staff_id=None, job=None, child_name=None):
+        
+        data = {}
+
+        if password is not None:
+            data["password"] = password
+
+        if role is not None:
+            data["role"] = role
+
+        if staff_id is not None:
+            data["staff_id"] = staff_id
+
+        if job is not None:
+            data["job"] = job
+
+        if child_name is not None:
+            data["child_name"] = child_name
+
+        if data:
+            supabase.table("users") \
+                .update(data) \
+                .eq("username", username) \
+                .execute()
+
+    def delete_user(self, username):
+
+        supabase.table("users") \
+            .delete() \
+            .eq("username", username) \
+            .execute()
+            

@@ -43,26 +43,8 @@ def load_events(save_file):
             return json.load(f)
     return {}
 
-#ユーザー保存json
-def get_user_file():
-    return os.path.join(SCRIPT_DIR, "users.json")
-
 def load_users():
-
-    #supabase用コード
     return repo.get_all_users()
-
-'''
-    file = get_user_file()
-    if os.path.exists(file):
-        with open(file, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
-'''
-
-def save_users(users):
-    with open(get_user_file(), "w", encoding="utf-8") as f:
-        json.dump(users, f, ensure_ascii=False, indent=2)
 
 app: Flask = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
@@ -188,8 +170,7 @@ def change_password():
             return redirect(url_for("change_password"))
         
         #更新
-        users[username]["password"] = generate_password_hash(new_pw)
-        save_users(users)
+        repo.update_user(username, password=generate_password_hash(new_pw))
 
         flash("パスワードを変更しました。", "success")
         return redirect(url_for("change_password"))
@@ -236,12 +217,13 @@ def edit_user(username):
             flash("adminの権限は変更できません", "danger")
             return redirect(url_for("admin_page", username=username))
 
-        users[username]["staff_id"] = staff_id
-        users[username]["job"] = job
-        users[username]["child_name"] = child_name
-        users[username]["role"] = role
-
-        save_users(users)
+        repo.update_user(
+            username,
+            role=role,
+            staff_id=staff_id,
+            job=job,
+            child_name=child_name
+        )
 
         flash("更新しました", "success")
         return redirect(url_for("admin_page"))
@@ -279,9 +261,7 @@ def reset(username):
             flash("パスワードは8文字以上にしてください。", "danger")
             return redirect(url_for("reset", username=username))
         
-        users[username]["password"] = generate_password_hash(temp_pw)
-
-        save_users(users)
+        repo.update_user(username, password=generate_password_hash(temp_pw))
 
         flash(f"{username}のパスワードを変更しました。", "success")
 
@@ -307,8 +287,7 @@ def delete_user(username):
         return redirect(url_for("admin_page"))
     
     if username in users:
-        del users[username]
-        save_users(users)
+        repo.delete_user(username)
 
         #カレンダーデータ削除
         for mode in ["holiday", "workday", "childday"]:
@@ -348,8 +327,7 @@ def toggle_role(username):
     index = role_order.index(current_role)
     new_role = role_order[(index + 1) % len(role_order)]
 
-    users[username]["role"] = new_role
-    save_users(users)
+    repo.update_user(username, role=new_role)
 
     flash(f"{username}の属性を{new_role}に変更しました。", "success")
     return redirect(url_for("admin_page"))
