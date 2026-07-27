@@ -6,8 +6,10 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment
 import io
 from user_repository import UserRepository
+from calendar_repository import CalendarRepository
 
 repo = UserRepository()
+calendar_repo = CalendarRepository()
 
 #admin作成
 def init_admin():
@@ -33,15 +35,22 @@ def init_admin():
 
 #予定イベントの保存先
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+"""
 #json保存先
 def get_save_file(username, mode):
     return os.path.join(SCRIPT_DIR, f"calendar_{username}_{mode}.json")
+"""
 #イベントファイル読み込みの共通関数
+def load_events(username, mode):
+    return calendar_repo.get_all_events(username, mode)
+
+"""
 def load_events(save_file):
     if os.path.exists(save_file):
         with open(save_file, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
+"""
 
 def load_users():
     return repo.get_all_users()
@@ -592,8 +601,8 @@ def index_post(mode):
     
     username = session["user"]
 
-    SAVE_FILE = get_save_file(username, mode)
-    events = load_events(SAVE_FILE)
+    #SAVE_FILE = get_save_file(username, mode)
+    events = load_events(username, mode)
 
     #パラメータを得る
     date = request.form.get("date", "")
