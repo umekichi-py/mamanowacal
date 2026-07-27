@@ -1,32 +1,75 @@
-<form method="get" action="{{ url_for('admin_calendar_view') }}">
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <title>カレンダー選択</title>
+</head>
 
-    <div class="field">
-        <label>カレンダー</label>
+<body>
 
-        <div class="control">
-            <div class="select">
-                <select name="mode">
-                    <option value="holiday">休み希望</option>
-                    <option value="workday">出勤希望</option>
-                    <option value="childday">預かり希望</option>
-                </select>
+<section class="hero is-info">
+    <div class="hero-body">
+        <p class="title has-text-white">カレンダー一覧</p>
+        <p class="subtitle has-text-white">表示したいカレンダーと月を選択してください。</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container" style="max-width: 640px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notification is-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <header class="card-header has-background-light">
+                <p class="card-header-title">カレンダー選択</p>
+            </header>
+
+            <div class="card-content">
+                <form method="get" action="{{ url_for('admin_calendar_view') }}">
+
+                    <div class="field">
+                        <label class="label">カレンダー</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select name="mode">
+                                    <option value="holiday">休み希望</option>
+                                    <option value="workday">出勤希望</option>
+                                    <option value="childday">預かり希望</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label">月</label>
+                        <div class="control">
+                            <input class="input" type="month" name="month" value="{{ default_month }}" required>
+                        </div>
+                    </div>
+
+                    <div class="field is-grouped is-grouped-right">
+                        <div class="control">
+                            <button type="submit" class="button is-primary">表示</button>
+                        </div>
+                        <div class="control">
+                            <a href="{{ url_for('admin_page') }}" class="button is-light">管理者ページへ戻る</a>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-
     </div>
+</section>
 
-    <div class="field">
-        <label>月</label>
-        <input type="month" name="month" value="{{ default_month }}">
-    </div>
-
-    <button class="button is-primary">表示</button>
-
-    <div class="m-3">
-        <a href="{{ url_for('admin_page') }}" class="button is-light">
-            ←管理者ページに戻る
-        </a>
-
-    </div>
-
-</form>
+</body>
+</html>
