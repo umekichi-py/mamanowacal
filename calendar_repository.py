@@ -41,7 +41,7 @@ class CalendarRepository:
 
         result = (
             supabase.table("calendar_events")
-            .upsert(event, on_conflict=("username", "mode", "date"))
+            .upsert(event, on_conflict="username, mode, date")
             .execute()
         )
         return result
