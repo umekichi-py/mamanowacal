@@ -1,4 +1,4 @@
-import os, json, calendar, re
+import os, calendar, re
 from datetime import datetime
 from flask import Flask, request, render_template, redirect, url_for, session, flash, send_file
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -33,24 +33,9 @@ def init_admin():
         print("管理者アカウント作成:admin / admin123")
 '''
 
-#予定イベントの保存先
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-"""
-#json保存先
-def get_save_file(username, mode):
-    return os.path.join(SCRIPT_DIR, f"calendar_{username}_{mode}.json")
-"""
 #イベントファイル読み込みの共通関数
 def load_events(username, mode):
     return calendar_repo.get_all_events(username, mode)
-
-"""
-def load_events(save_file):
-    if os.path.exists(save_file):
-        with open(save_file, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
-"""
 
 def load_users():
     return repo.get_all_users()
@@ -297,13 +282,7 @@ def delete_user(username):
     
     if username in users:
         repo.delete_user(username)
-
-        #カレンダーデータ削除
-        for mode in ["holiday", "workday", "childday"]:
-            file = get_save_file(username, mode)
-            if os.path.exists(file):
-                os.remove(file)
-
+        calendar_repo.delete_user_events(username)
         flash(f"{username}を削除しました。", "success")
 
     return redirect(url_for('admin_page'))
@@ -398,15 +377,8 @@ def admin_calendar_view():
         table[date] = {}
 
         for username, user in users_sorted:
-            file = get_save_file(username, mode)
-            if os.path.exists(file):
-                with open(file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-
-                table[date][username] = data.get(date, {})
-
-            else:
-                table[date][username] = {}
+            data = calendar_repo.get_all_events(username, mode)
+            table[date][username] = data.get(date, {})
 
     return render_template(
         "admin_calendar_table.html",
@@ -473,21 +445,17 @@ def export_calendar():
 
         col = 2
         for username in users:
-            file = get_save_file(username, mode)
+            data = calendar_repo.get_all_events(username, mode)
 
             time_S = ""
             time_E = ""
             comment = ""
 
-            if os.path.exists(file):
-                with open(file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-
-                if date in data:
-                    e = data[date]
-                    time_S = e.get('timeS', '')
-                    time_E = e.get('timeE', '')
-                    comment = e.get("comment", "")
+            if date in data:
+                e = data[date]
+                time_S = e.get('timeS', '')
+                time_E = e.get('timeE', '')
+                comment = e.get("comment", "")
             
             #上段：開始時刻+コメント
             ws.cell(row=row1, column=col, value=format_time(time_S))
@@ -635,11 +603,7 @@ def index_post(mode):
 
     if action == "delete":
         if date in events:
-            del events[date]
-
-            with open(SAVE_FILE, "w", encoding="utf-8") as f:
-                json.dump(events, f, ensure_ascii=False, indent=2)
-
+            calendar_repo.delete_event(username, mode, date)
             flash("予定を削除しました", "success")
         else:
             flash("削除対象が見つかりません", "warning")
@@ -661,14 +625,14 @@ def index_post(mode):
         flash("終了時刻は開始より後にしてください。", "warning")
         return redirect(url_for("index_get", mode=mode, year=year, month=month))
 
-    #イベントを年月日に追加(イベント変数にイベント内容を代入)
-    events[date] = {
-        "timeS": timeS,
-        "timeE": timeE,
-        "comment": comment
-    }
-    with open(SAVE_FILE, "w", encoding="utf-8") as f:
-        json.dump(events, f, ensure_ascii=False, indent=2)
+    calendar_repo.save_event(
+        username,
+        mode,
+        date,
+        timeS,
+        timeE,
+        comment
+    )
     return redirect(url_for("index_get", mode=mode, year=year, month=month))
 
 if __name__ == "__main__":
