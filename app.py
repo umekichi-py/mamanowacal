@@ -369,7 +369,12 @@ def admin_calendar_view():
             x[0]
         )
     )
-                 
+
+    usernames = [username for username, _ in users_sorted]
+    start_date = f"{year}-{month:02d}-01"
+    end_date = f"{year}-{month:02d}-{days:02d}"
+    all_events = calendar_repo.get_events_by_users(usernames, mode, start_date, end_date)
+
     table = {}
 
     for day in range(1, days +1):
@@ -377,8 +382,7 @@ def admin_calendar_view():
         table[date] = {}
 
         for username, user in users_sorted:
-            data = calendar_repo.get_all_events(username, mode)
-            table[date][username] = data.get(date, {})
+            table[date][username] = all_events.get(username, {}).get(date, {})
 
     return render_template(
         "admin_calendar_table.html",
@@ -417,6 +421,11 @@ def export_calendar():
     users = load_users()
     days = calendar.monthrange(year, month)[1]
 
+    usernames = list(users.keys())
+    start_date = f"{year}-{month:02d}-01"
+    end_date = f"{year}-{month:02d}-{days:02d}"
+    all_events = calendar_repo.get_events_by_users(usernames, mode, start_date, end_date)
+
     wb = Workbook()
     ws = wb.active
     ws.title = f"{year}-{month}"
@@ -445,7 +454,7 @@ def export_calendar():
 
         col = 2
         for username in users:
-            data = calendar_repo.get_all_events(username, mode)
+            data = all_events.get(username, {})
 
             time_S = ""
             time_E = ""
