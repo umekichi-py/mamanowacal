@@ -536,8 +536,8 @@ def index_get(mode):
     username = session["user"]
 
     #イベントデータ読み込み
-    SAVE_FILE = get_save_file(username, mode)
-    events = load_events(SAVE_FILE)
+    #SAVE_FILE = get_save_file(username, mode)
+    events = load_events(username, mode)
 
     titles = {
         "holiday": "休み希望用",
