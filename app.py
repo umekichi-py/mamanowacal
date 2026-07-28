@@ -566,47 +566,73 @@ def export_calendar_pdf():
         for username, _ in users_sorted:
             data = all_events.get(username, {}).get(date, {})
             if data:
-                row.append(f"{data.get('timeS','')}\n{data.get('comment','')}\n{data.get('timeE','')}")
+                timeS = data.get("timeS", "")
+                timeE = data.get("timeE", "")
+                comment = data.get("comment", "")
+
+                text = f"{timeS}-{timeE}"
+
+                if comment:
+                    text += f"{comment}"
+                row.append(text)
             else:
                 row.append("")
         rows.append(row)
 
     page_width, page_height = A4
-    max_rows_per_page = 24
-    max_cols_per_page = 6
-    row_count = len(rows)
+    MAX_USERS = 5
 
-    for start_row in range(0, row_count, max_rows_per_page):
-        end_row = min(start_row + max_rows_per_page, row_count)
-        page_rows = rows[start_row:end_row]
-        if start_row > 0:
-            story.append(PageBreak())
+    fixed_header = headers[0]
+    user_headers = headers[1:]
 
-        for col_start in range(0, len(headers), max_cols_per_page):
-            col_end = min(col_start + max_cols_per_page, len(headers))
-            page_headers = headers[col_start:col_end]
-            page_rows_subset = []
-            for row in page_rows:
-                page_rows_subset.append(row[col_start:col_end])
+    for col_start in range(0, len(user_headers), MAX_USERS):
 
-            table = Table(page_rows_subset, repeatRows=1, hAlign='LEFT', colWidths=[55] + [42] * (len(page_headers) - 1))
+        page_headers = [fixed_header] + \
+            user_headers[col_start:col_start+MAX_USERS]
+
+        page_rows = [page_headers]
+
+        for row in rows[1:]:
+
+            page_rows.append(
+                [row[0]] +
+                row[1+col_start:1+col_start+MAX_USERS]
+            )
+
+            table = Table(
+                page_rows,
+                repeatRows=1,
+                hAlign="LEFT",
+                colWidths=[35] + [90]*(len(page_headers)-1)
+            )
+
             table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f5f5f5')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('FONTNAME', (0, 0), (-1, 0), PDF_JP_FONT + '-Bold'),
-                ('FONTNAME', (0, 1), (-1, -1), PDF_JP_FONT),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fafafa')]),
-                ('TOPPADDING', (0, 0), (-1, -1), 2),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-                ('LEFTPADDING', (0, 0), (-1, -1), 2),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 2),
-                ('FONTSIZE', (0, 0), (-1, -1), 7),
+
+                ("GRID",(0,0),(-1,-1),0.3,colors.grey),
+
+                ("BACKGROUND",(0,0),(-1,0),colors.HexColor("#eeeeee")),
+
+                ("ALIGN",(0,0),(-1,-1),"CENTER"),
+
+                ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+
+                ("FONTNAME",(0,0),(-1,-1),PDF_JP_FONT),
+
+                ("FONTSIZE",(0,0),(-1,-1),6),
+
+                ("TOPPADDING",(0,0),(-1,-1),1),
+
+                ("BOTTOMPADDING",(0,0),(-1,-1),1),
+
+                ("LEFTPADDING",(0,0),(-1,-1),1),
+
+                ("RIGHTPADDING",(0,0),(-1,-1),1),
+
             ]))
+
             story.append(table)
-            story.append(Spacer(1, 6))
+            if col_start + MAX_USERS < len(user_headers):
+                story.append(PageBreak())
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, title=f"calendar_{mode}_{year}_{month}")
