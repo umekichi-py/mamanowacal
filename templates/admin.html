@@ -26,7 +26,14 @@
 {% endwith %}
 
     <section class="section">
+
         <div class="container">
+
+            <div class="m-3">
+                <a href="{{url_for('register') }}" class="button is-warning">ユーザー登録</a>
+                <a href="{{ url_for('admin_calendar') }}" class="button is-info">カレンダー一覧</a>
+                <a href="{{ url_for('home') }}" class="button">ホームに戻る</a>
+            </div>
 
             <table class="table is-striped is-fullwidth">
 
@@ -99,13 +106,6 @@
                     属性をクリックすると、<br>user（職員）-withchild（職員預けあり）-childonly（園児親）-admin（管理者）-user<br>の順に属性が変わります。
                 </p>
             </div>
-            
-            <div class="m-3">
-                <a href="{{url_for('register') }}" class="button is-warning">ユーザー登録</a>
-                <a href="{{ url_for('admin_calendar') }}" class="button is-info">カレンダー一覧</a>
-                <a href="{{ url_for('home') }}" class="button">ホームに戻る</a>
-            </div>
-
         </div>
     </section>
 
