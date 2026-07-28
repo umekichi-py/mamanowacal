@@ -32,14 +32,11 @@
     }
     .table-container{
         overflow-x: auto;
-        overflow-y: hidden;
+        overflow-y: auto;
         width: 100%;
         min-width: 120px;
+        max-height: calc(100vh - 220px);
         padding-bottom: 0.5rem;
-    }
-
-    body {
-        overflow-x: auto;
     }
 </style>
 
@@ -51,6 +48,25 @@
     class="button is-success">
         Excel出力
     </a>
+    <a href="{{ url_for('export_calendar_pdf', mode=mode, month='%04d-%02d' % (year, month)) }}"
+    class="button is-link">
+        PDF出力
+    </a>
+</div>
+
+<div class="m-3">
+    <h2 class="title is-4 mb-0">
+        {{ year }}年{{ month }}月
+        {% if mode == 'holiday' %}
+            休み希望用
+        {% elif mode == 'workday' %}
+            出勤希望用
+        {% elif mode == 'childday' %}
+            子ども預け希望
+        {% else %}
+            カレンダー
+        {% endif %}
+    </h2>
 </div>
 
 <div class="table-container">

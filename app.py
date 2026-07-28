@@ -4,6 +4,10 @@ from flask import Flask, request, render_template, redirect, url_for, session, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
 import io
 from user_repository import UserRepository
 from calendar_repository import CalendarRepository
@@ -496,6 +500,81 @@ def export_calendar():
         download_name=filename,
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+
+@app.route("/admin/calendar/export_pdf")
+def export_calendar_pdf():
+    if session.get("role") != "admin":
+        return redirect(url_for("login"))
+
+    mode = request.args.get("mode")
+    month_str = request.args.get("month")
+
+    if not month_str:
+        now = datetime.now()
+        year = now.year
+        month = now.month
+    else:
+        year, month = map(int, month_str.split("-"))
+
+    users = load_users()
+    users_sorted = sort_users_for_display(users)
+    days = calendar.monthrange(year, month)[1]
+
+    usernames = [username for username, _ in users_sorted]
+    start_date = f"{year}-{month:02d}-01"
+    end_date = f"{year}-{month:02d}-{days:02d}"
+    all_events = calendar_repo.get_events_by_users(usernames, mode, start_date, end_date)
+
+    title_map = {
+        "holiday": "休み希望用",
+        "workday": "出勤希望用",
+        "childday": "子ども預け希望"
+    }
+    title = title_map.get(mode, "カレンダー")
+
+    story = []
+    styles = getSampleStyleSheet()
+    story.append(Paragraph(f"{year}年{month}月 {title}", styles['Title']))
+    story.append(Spacer(1, 12))
+
+    headers = ["日付"] + [get_user_display_name(username, user) for username, user in users_sorted]
+    rows = [headers]
+
+    for day in range(1, days + 1):
+        date = f"{year}-{month:02d}-{day:02d}"
+        row = [date]
+        for username, _ in users_sorted:
+            data = all_events.get(username, {}).get(date, {})
+            if data:
+                row.append(f"{data.get('timeS','')}\n{data.get('comment','')}\n{data.get('timeE','')}")
+            else:
+                row.append("")
+        rows.append(row)
+
+    table = Table(rows, repeatRows=1, hAlign='LEFT')
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f5f5f5')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fafafa')]),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('LEFTPADDING', (0, 0), (-1, -1), 4),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+    ]))
+    story.append(table)
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), title=f"calendar_{mode}_{year}_{month}")
+    doc.build(story)
+    buffer.seek(0)
+
+    filename = f"calendar_{mode}_{year}_{month}.pdf"
+    return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
 
 
 #トップページ
