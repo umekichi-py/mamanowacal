@@ -124,7 +124,6 @@
             <div class="card calendar-form-card">
                 <div class="card-header">
                     <p class="card-header-title">スケジュールの編集</p>
-                    <button class="delete" id="close-btn" type="button"></button>
                 </div>
                 <div class="card-content">
                     <form action="{{ url_for('index_post', mode=mode) }}" method="POST">
@@ -175,9 +174,9 @@
                         </div>
 
                         {% endif %}
-                        <div class="field">
+                        <div class="field mt-5">
                             <div class="control">
-                                <div class="field is-grouped">
+                                <div class="field is-grouped is-grouped-right">
                                     <div class="control">
                                         <button type="submit" name="action" value="save"
                                                 class="button is-info">
@@ -190,6 +189,12 @@
                                                 onclick="return confirm('本当に削除しますか？')"
                                                 class="button is-danger">
                                             削除
+                                        </button>
+                                    </div>
+
+                                    <div class="control">
+                                        <button type="button" id="close-btn" class="button is-light">
+                                            閉じる
                                         </button>
                                     </div>
                                 </div>
