@@ -5,15 +5,29 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 import io
 from user_repository import UserRepository
 from calendar_repository import CalendarRepository
 
 repo = UserRepository()
 calendar_repo = CalendarRepository()
+
+font_path = os.path.join(os.path.dirname(__file__), "fonts", "NotoSansJP-Regular.ttf")
+if os.path.exists(font_path):
+    pdfmetrics.registerFont(TTFont('NotoSansJP', font_path))
+    PDF_JP_FONT = 'NotoSansJP'
+else:
+    windows_font = os.path.join(os.getenv('WINDIR', 'C:\\Windows'), 'Fonts', 'msgothic.ttc')
+    if os.path.exists(windows_font):
+        pdfmetrics.registerFont(TTFont('MSGOTHIC', windows_font))
+        PDF_JP_FONT = 'MSGOTHIC'
+    else:
+        PDF_JP_FONT = 'Helvetica'
 
 #admin作成
 def init_admin():
@@ -535,8 +549,11 @@ def export_calendar_pdf():
 
     story = []
     styles = getSampleStyleSheet()
-    story.append(Paragraph(f"{year}年{month}月 {title}", styles['Title']))
-    story.append(Spacer(1, 12))
+    title_style = styles['Title']
+    title_style.fontName = PDF_JP_FONT
+    title_style.fontSize = 16
+    story.append(Paragraph(f"{year}年{month}月 {title}", title_style))
+    story.append(Spacer(1, 8))
 
     headers = ["日付"] + [get_user_display_name(username, user) for username, user in users_sorted]
     rows = [headers]
@@ -552,19 +569,20 @@ def export_calendar_pdf():
                 row.append("")
         rows.append(row)
 
-    table = Table(rows, repeatRows=1, hAlign='LEFT')
+    table = Table(rows, repeatRows=1, hAlign='LEFT', colWidths=[55] + [38] * (len(headers) - 1))
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f5f5f5')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 0), (-1, 0), PDF_JP_FONT + '-Bold'),
+        ('FONTNAME', (0, 1), (-1, -1), PDF_JP_FONT),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fafafa')]),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ('LEFTPADDING', (0, 0), (-1, -1), 2),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 2),
     ]))
     story.append(table)
 
