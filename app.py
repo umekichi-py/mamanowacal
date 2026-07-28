@@ -599,7 +599,8 @@ def index_post(mode):
     #締め切りチェック
     now = datetime.now()
 
-    deadline = datetime(year, month, 21, 0, 0)
+    deadline = datetime(year, month, 23, 0, 0)
+    #23日0時以降は締め切り
 
     if now >= deadline:
         flash("締め切りました。", "danger")
