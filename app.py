@@ -10,6 +10,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.enums import TA_LEFT
 import io
 from user_repository import UserRepository
 from calendar_repository import CalendarRepository
@@ -551,9 +552,10 @@ def export_calendar_pdf():
     styles = getSampleStyleSheet()
     title_style = styles['Title']
     title_style.fontName = PDF_JP_FONT
-    title_style.fontSize = 16
+    title_style.fontSize = 14
+    title_style.leading = 16
     story.append(Paragraph(f"{year}年{month}月 {title}", title_style))
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 6))
 
     headers = ["日付"] + [get_user_display_name(username, user) for username, user in users_sorted]
     rows = [headers]
@@ -569,25 +571,45 @@ def export_calendar_pdf():
                 row.append("")
         rows.append(row)
 
-    table = Table(rows, repeatRows=1, hAlign='LEFT', colWidths=[55] + [38] * (len(headers) - 1))
-    table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f5f5f5')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (0, 0), (-1, 0), PDF_JP_FONT + '-Bold'),
-        ('FONTNAME', (0, 1), (-1, -1), PDF_JP_FONT),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fafafa')]),
-        ('TOPPADDING', (0, 0), (-1, -1), 2),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
-        ('LEFTPADDING', (0, 0), (-1, -1), 2),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 2),
-    ]))
-    story.append(table)
+    page_width, page_height = A4
+    max_rows_per_page = 24
+    max_cols_per_page = 6
+    row_count = len(rows)
+
+    for start_row in range(0, row_count, max_rows_per_page):
+        end_row = min(start_row + max_rows_per_page, row_count)
+        page_rows = rows[start_row:end_row]
+        if start_row > 0:
+            story.append(PageBreak())
+
+        for col_start in range(0, len(headers), max_cols_per_page):
+            col_end = min(col_start + max_cols_per_page, len(headers))
+            page_headers = headers[col_start:col_end]
+            page_rows_subset = []
+            for row in page_rows:
+                page_rows_subset.append(row[col_start:col_end])
+
+            table = Table(page_rows_subset, repeatRows=1, hAlign='LEFT', colWidths=[55] + [42] * (len(page_headers) - 1))
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f5f5f5')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('FONTNAME', (0, 0), (-1, 0), PDF_JP_FONT + '-Bold'),
+                ('FONTNAME', (0, 1), (-1, -1), PDF_JP_FONT),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fafafa')]),
+                ('TOPPADDING', (0, 0), (-1, -1), 2),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+                ('LEFTPADDING', (0, 0), (-1, -1), 2),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 2),
+                ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ]))
+            story.append(table)
+            story.append(Spacer(1, 6))
 
     buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), title=f"calendar_{mode}_{year}_{month}")
+    doc = SimpleDocTemplate(buffer, pagesize=A4, title=f"calendar_{mode}_{year}_{month}")
     doc.build(story)
     buffer.seek(0)
 
