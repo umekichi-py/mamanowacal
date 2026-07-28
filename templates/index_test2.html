@@ -10,6 +10,26 @@
         position: relative;
     }
 
+    .calendar-overlay{
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(255,255,255,0.8);
+        z-index: 20;
+    }
+
+    .calendar-overlay.is-hidden {
+        display: none;
+    }
+
+    .calendar-form-card {
+        width: min(100%, 480px);
+        box-shadow: 0 0.5em 1em rgba(10, 10, 10, 0.2);
+    }
+
     .closed-overlay{
         position: absolute;
         top: 0;
@@ -100,90 +120,92 @@
             </table>
         </div>
 
+        <div id="form" class="calendar-overlay is-hidden">
+            <div class="card calendar-form-card">
+                <div class="card-header">
+                    <p class="card-header-title">スケジュールの編集</p>
+                    <button class="delete" id="close-btn" type="button"></button>
+                </div>
+                <div class="card-content">
+                    <form action="{{ url_for('index_post', mode=mode) }}" method="POST">
+                        <!--ここのフィールドを増やせばよさそう。休み希望と出勤希望の選択式にして、時間入力も受け付ける。-->
+                        <div class="field">
+                            <label class="label" for="date">日付</label>
+                            <div class="control">
+                                <input id="date" class="input"
+                                    type="date" name="date">
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="checkbox">
+                                <input type="checkbox" id="allDay">
+                                終日
+                            </label>
+                        </div>
+                        <div class="field">
+                            <label class="label" for="timeS">開始時刻</label>
+                            <div class="control">
+                                <div class="select">
+                                    <select id="timeS" name="timeS">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label" for="timeE">終了時刻</label>
+                            <div class="control">
+                                <div class="select">
+                                    <select id="timeE" name="timeE">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!--ここはコメント欄として再利用。最終的には赤い印がつくようにする。-->
+                        {% if mode == "workday" %}
+
+                        <div class="field">
+                            <label class="checkbox">
+                                <input type="checkbox" id="triangleCheck">
+                                勤務できるができれば休みたい。
+                            </label>
+                        </div>
+
+                        <input type="hidden" id="comment" name="comment">
+
+                        {% endif %}
+                        <div class="field">
+                            <div class="control">
+                                <div class="field is-grouped">
+                                    <div class="control">
+                                        <button type="submit" name="action" value="save"
+                                                class="button is-info">
+                                            保存
+                                        </button>
+                                    </div>
+
+                                    <div class="control">
+                                        <button type="submit" name="action" value="delete"
+                                                onclick="return confirm('本当に削除しますか？')"
+                                                class="button is-danger">
+                                            削除
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         {% if is_closed %}
         <div class="closed-overlay">
             締切済み
         </div>
         {% endif %}
 
-    </div>
-    <!-- イベントを追加するフォーム --- (※4) -->
-    <div id="form" class="m-5 card is-hidden">
-        <div class="card-header">
-            <p class="card-header-title">スケジュールの編集</p>
-            <button class="delete" id="close-btn" type="button"></button>
-        </div>
-        <div class="card-content">
-            <form action="{{ url_for('index_post', mode=mode) }}" method="POST">
-                <!--ここのフィールドを増やせばよさそう。休み希望と出勤希望の選択式にして、時間入力も受け付ける。-->
-                <div class="field">
-                    <label class="label" for="date">日付</label>
-                    <div class="control">
-                        <input id="date" class="input"
-                            type="date" name="date">
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="checkbox">
-                        <input type="checkbox" id="allDay">
-                        終日
-                    </label>
-                </div>
-                <div class="field">
-                    <label class="label" for="timeS">開始時刻</label>
-                    <div class="control">
-                        <div class="select">
-                            <select id="timeS" name="timeS">
-                                <option value=""></option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="field">
-                    <label class="label" for="timeE">終了時刻</label>
-                    <div class="control">
-                        <div class="select">
-                            <select id="timeE" name="timeE">
-                                <option value=""></option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <!--ここはコメント欄として再利用。最終的には赤い印がつくようにする。-->
-                {% if mode == "workday" %}
-
-                <div class="field">
-                    <label class="checkbox">
-                        <input type="checkbox" id="triangleCheck">
-                        勤務できるができれば休みたい。
-                    </label>
-                </div>
-
-                <input type="hidden" id="comment" name="comment">
-
-                {% endif %}
-                <div class="field">
-                    <div class="control">
-                        <div class="field is-grouped">
-                            <div class="control">
-                                <button type="submit" name="action" value="save"
-                                        class="button is-info">
-                                    保存
-                                </button>
-                            </div>
-
-                            <div class="control">
-                                <button type="submit" name="action" value="delete"
-                                        onclick="return confirm('本当に削除しますか？')"
-                                        class="button is-danger">
-                                    削除
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
     </div>
     <script>
     // HTMLが全部読み込まれてから実行
