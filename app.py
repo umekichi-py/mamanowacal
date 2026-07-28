@@ -40,6 +40,23 @@ def load_events(username, mode):
 def load_users():
     return repo.get_all_users()
 
+
+def get_user_display_name(username, user):
+    user_data = user or {}
+    return f"{user_data.get('job') or ''}{user_data.get('staff_id') or ''}{username}"
+
+
+def sort_users_for_display(users):
+    job_order = {"育": 1, "援": 2, "給": 3, "看": 4}
+    return sorted(
+        users.items(),
+        key=lambda item: (
+            job_order.get((item[1] or {}).get("job") or "", 99),
+            (item[1] or {}).get("staff_id") or "",
+            item[0]
+        )
+    )
+
 app: Flask = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 init_admin()
@@ -358,18 +375,7 @@ def admin_calendar_view():
     days = calendar.monthrange(year, month)[1]
 
     users = load_users()
-
-    job_order = {"育": 1, "援": 2, "給": 3, "看": 4 }
-
-    users_sorted = sorted(
-        users.items(),
-        key=lambda x: (
-            job_order.get(x[1].get("job") or "", 99),
-            x[1].get("staff_id") or "",
-            x[0]
-        )
-    )
-
+    users_sorted = sort_users_for_display(users)
     usernames = [username for username, _ in users_sorted]
     start_date = f"{year}-{month:02d}-01"
     end_date = f"{year}-{month:02d}-{days:02d}"
@@ -419,9 +425,10 @@ def export_calendar():
         year, month = map(int, month_str.split("-"))
 
     users = load_users()
+    users_sorted = sort_users_for_display(users)
     days = calendar.monthrange(year, month)[1]
 
-    usernames = list(users.keys())
+    usernames = [username for username, _ in users_sorted]
     start_date = f"{year}-{month:02d}-01"
     end_date = f"{year}-{month:02d}-{days:02d}"
     all_events = calendar_repo.get_events_by_users(usernames, mode, start_date, end_date)
@@ -434,8 +441,9 @@ def export_calendar():
     ws.cell(row=1, column=1, value="日付")
 
     col = 2
-    for username in users:
-        ws.cell(row=1, column=col, value=username)
+    for username, user in users_sorted:
+        display_name = get_user_display_name(username, user)
+        ws.cell(row=1, column=col, value=display_name)
         ws.cell(row=1, column=col+1, value="")
 
         #1ユーザー2列使用
@@ -453,7 +461,7 @@ def export_calendar():
         ws.cell(row=row1, column=1, value=date)
 
         col = 2
-        for username in users:
+        for username, _ in users_sorted:
             data = all_events.get(username, {})
 
             time_S = ""
