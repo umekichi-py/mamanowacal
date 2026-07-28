@@ -163,6 +163,8 @@
                             </div>
                         </div>
                         <!--ここはコメント欄として再利用。最終的には赤い印がつくようにする。-->
+                        <input type="hidden" id="comment" name="comment">
+
                         {% if mode == "workday" %}
 
                         <div class="field">
@@ -171,8 +173,6 @@
                                 勤務できるができれば休みたい。
                             </label>
                         </div>
-
-                        <input type="hidden" id="comment" name="comment">
 
                         {% endif %}
                         <div class="field">
@@ -225,15 +225,18 @@
                 q('#date').value = ym + e.dataset.d;
                 q("#timeS").value = e.dataset.ts;
                 q("#timeE").value = e.dataset.te;
-                q("#comment").value = e.dataset.c;
+
+                const comment = document.getElementById("comment");
+                if (comment) {
+                    comment.value = e.dataset.c || "";
+                    comment.focus();
+                }
 
                 const triangleCheck = document.getElementById("triangleCheck");
 
                 if(triangleCheck) {
                     triangleCheck.checked = (e.dataset.c === "△");
                 }
-
-                q("#comment").focus()
 
                 if (e.dataset.ts === "7:00" && e.dataset.te === "26:00") {
                     allDay.checked = true;
