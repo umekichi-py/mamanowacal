@@ -76,6 +76,13 @@ def sort_users_for_display(users):
         )
     )
 
+def get_display_name(username, user, mode):
+        if mode == "childday":
+            return user.get("child_name") or username
+
+        return f"{user.get('job') or ''}{user.get('staff_id') or ''}{username}"
+
+
 app: Flask = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 init_admin()
@@ -416,7 +423,8 @@ def admin_calendar_view():
         users_sorted=users_sorted,
         year = year,
         month = month,
-        mode = mode
+        mode = mode,
+        get_display_name=get_display_name
     )
 
 #Excel出力
@@ -461,7 +469,7 @@ def export_calendar():
 
     col = 2
     for username, user in users_sorted:
-        display_name = get_user_display_name(username, user)
+        display_name = get_display_name(username, user, mode) #もともとget_user_display_nameを使っていたが、modeによって表示名を変える必要があるのでget_display_nameに変更
         ws.cell(row=1, column=col, value=display_name)
         ws.cell(row=1, column=col+1, value="")
 
@@ -752,8 +760,17 @@ def index_post(mode):
     #締め切りチェック
     now = datetime.now()
 
-    deadline = datetime(year, month, 23, 0, 0)
-    #23日0時以降は締め切り
+    #入力月の前月を求める
+    if month == 1:
+        deadline_year = year - 1
+        deadline_month = 12
+
+    else:
+        deadline_year = year
+        deadline_month = month - 1
+
+    #23日0:00で締め切り(つまり22日23:59まで入力可能)
+    deadline = datetime(deadline_year, deadline_month, 23, 0, 0)
 
     if now >= deadline:
         flash("締め切りました。", "danger")

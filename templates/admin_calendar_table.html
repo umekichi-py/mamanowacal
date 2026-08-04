@@ -79,7 +79,7 @@
                 <th>日付</th>
 
                 {% for username, user in users_sorted %}
-                <th>{{ user.job or "" }}{{ user.staff_id or "" }}{{ username }}</th>
+                <th>{{ get_display_name(username, user, mode) }}</th> <!-- {{ user.job or "" }}{{ user.staff_id or "" }}{{ username }}-->
                 {% endfor %}
 
             </tr>
