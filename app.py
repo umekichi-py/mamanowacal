@@ -125,9 +125,9 @@ def register():
         username = request.form.get("username")
         password = request.form.get("password")
         role = request.form.get("role", "user")
-        staff_id = request.form.get("staff_id")
+        staff_id = request.form.get("staff_id") or None
         job = request.form.get("job")
-        child_name = request.form.get("child_name")
+        child_name = request.form.get("child_name") or None
 
         if not username or not password:
             flash("未入力があります。", "error")
