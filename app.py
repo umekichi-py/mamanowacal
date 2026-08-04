@@ -63,7 +63,7 @@ def load_users():
 def get_user_display_name(username, user, mode=None):
     user_data = user or {}
     if mode == "childday":
-        return user_data.get("child_name") or username
+        return user_data.get("child_name") or ""
     return f"{user_data.get('job') or ''}{user_data.get('staff_id') or ''}{username}"
 
 
@@ -81,7 +81,7 @@ def sort_users_for_display(users):
 def get_display_name(username, user, mode):
     user_data = user or {}
     if mode == "childday":
-        return user_data.get("child_name") or username
+        return user_data.get("child_name") or ""
 
     return f"{user_data.get('job') or ''}{user_data.get('staff_id') or ''}{username}"
 
