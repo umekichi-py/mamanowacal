@@ -67,16 +67,35 @@ def get_user_display_name(username, user, mode=None):
     return f"{user_data.get('job') or ''}{user_data.get('staff_id') or ''}{username}"
 
 
-def sort_users_for_display(users):
+def filter_users_for_display(users, mode):
+    filtered = []
+    for username, user in users.items():
+        user_data = user or {}
+        role = user_data.get("role")
+
+        if mode in {"holiday", "workday"} and role == "childonly":
+            continue
+
+        if mode == "childday":
+            if not user_data.get("child_name"):
+                continue
+
+        filtered.append((username, user_data))
+
     job_order = {"育": 1, "援": 2, "給": 3, "看": 4}
     return sorted(
-        users.items(),
+        filtered,
         key=lambda item: (
             job_order.get((item[1] or {}).get("job") or "", 99),
             (item[1] or {}).get("staff_id") or "",
             item[0]
         )
     )
+
+
+def sort_users_for_display(users):
+    return filter_users_for_display(users, None)
+
 
 def get_display_name(username, user, mode):
     user_data = user or {}
@@ -404,7 +423,7 @@ def admin_calendar_view():
     days = calendar.monthrange(year, month)[1]
 
     users = load_users()
-    users_sorted = sort_users_for_display(users)
+    users_sorted = filter_users_for_display(users, mode)
     usernames = [username for username, _ in users_sorted]
     start_date = f"{year}-{month:02d}-01"
     end_date = f"{year}-{month:02d}-{days:02d}"
@@ -455,7 +474,7 @@ def export_calendar():
         year, month = map(int, month_str.split("-"))
 
     users = load_users()
-    users_sorted = sort_users_for_display(users)
+    users_sorted = filter_users_for_display(users, mode)
     days = calendar.monthrange(year, month)[1]
 
     usernames = [username for username, _ in users_sorted]
@@ -544,7 +563,7 @@ def export_calendar_pdf():
         year, month = map(int, month_str.split("-"))
 
     users = load_users()
-    users_sorted = sort_users_for_display(users)
+    users_sorted = filter_users_for_display(users, mode)
     days = calendar.monthrange(year, month)[1]
 
     usernames = [username for username, _ in users_sorted]
