@@ -396,7 +396,15 @@ def admin_calendar():
         return "不正な操作です。ページを開きなおしてください。"
     
     now = datetime.now()
-    default_month = now.strftime("%Y-%m")
+
+    if now.month == 12:
+        year = now.year + 1
+        month = 1
+    else:
+        year = now.year
+        month = now.month + 1
+
+    default_month = f"{year}-{month:02d}"
 
     return render_template(
         "admin_calendar_select.html",
