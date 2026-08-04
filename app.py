@@ -704,7 +704,18 @@ def index_get(mode):
     now = datetime.now()
     year = int(request.args.get("year", now.year))
     month = int(request.args.get("month", now.month))
-    deadline = datetime(year, month, 21, 0, 0)
+    #入力月の前月を求める
+    if month == 1:
+        deadline_year = year - 1
+        deadline_month = 12
+
+    else:
+        deadline_year = year
+        deadline_month = month - 1
+
+    #23日0:00で締め切り(つまり22日23:59まで入力可能)
+    deadline = datetime(deadline_year, deadline_month, 23, 0, 0)
+
     is_closed = now >= deadline
     #日曜始まりのカレンダーを作成
     cal = calendar.Calendar(calendar.SUNDAY)
@@ -773,7 +784,7 @@ def index_post(mode):
     deadline = datetime(deadline_year, deadline_month, 23, 0, 0)
 
     if now >= deadline:
-        flash("締め切りました。", "danger")
+        flash("締め切りました。", "warning")
         return redirect(url_for(
             "index_get",
             mode=mode,
