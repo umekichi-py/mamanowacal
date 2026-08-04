@@ -60,8 +60,10 @@ def load_users():
     return repo.get_all_users()
 
 
-def get_user_display_name(username, user):
+def get_user_display_name(username, user, mode=None):
     user_data = user or {}
+    if mode == "childday":
+        return user_data.get("child_name") or username
     return f"{user_data.get('job') or ''}{user_data.get('staff_id') or ''}{username}"
 
 
@@ -77,10 +79,11 @@ def sort_users_for_display(users):
     )
 
 def get_display_name(username, user, mode):
-        if mode == "childday":
-            return user.get("child_name") or username
+    user_data = user or {}
+    if mode == "childday":
+        return user_data.get("child_name") or username
 
-        return f"{user.get('job') or ''}{user.get('staff_id') or ''}{username}"
+    return f"{user_data.get('job') or ''}{user_data.get('staff_id') or ''}{username}"
 
 
 app: Flask = Flask(__name__)
@@ -469,7 +472,7 @@ def export_calendar():
 
     col = 2
     for username, user in users_sorted:
-        display_name = get_display_name(username, user, mode) #もともとget_user_display_nameを使っていたが、modeによって表示名を変える必要があるのでget_display_nameに変更
+        display_name = get_display_name(username, user, mode)
         ws.cell(row=1, column=col, value=display_name)
         ws.cell(row=1, column=col+1, value="")
 
@@ -565,7 +568,7 @@ def export_calendar_pdf():
     story.append(Paragraph(f"{year}年{month}月 {title}", title_style))
     story.append(Spacer(1, 6))
 
-    headers = ["日付"] + [get_user_display_name(username, user) for username, user in users_sorted]
+    headers = ["日付"] + [get_user_display_name(username, user, mode) for username, user in users_sorted]
     rows = [headers]
 
     for day in range(1, days + 1):
