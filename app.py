@@ -109,6 +109,12 @@ app: Flask = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 init_admin()
 
+@app.context_processor
+def inject_environment():
+    return {
+        "is_test": os.environ.get("APP_ENV") == "test"
+    }
+
 #ユーザー登録機能
 @app.route("/register", methods=["GET", "POST"])
 def register():

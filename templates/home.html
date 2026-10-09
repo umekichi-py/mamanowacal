@@ -9,6 +9,14 @@
 </head>
 
 <body>
+    <!-- テスト環境の表示 -->
+    {% if is_test %}
+    <div class="notification is-warning has-text-centered mb-0"
+         style="border-radius: 0; border-bottom: 1px solid #dbdbdb;">
+        <strong>テスト環境</strong>
+        <p class="is-size-7">この環境はテスト用です。変更すると実際のデータにも反映されます。</p>
+    </div>
+    {% endif %}
     <!-- ヘッダー -->
     <section class="hero is-primary is-medium">
         <div class="hero-body has-text-centered">
