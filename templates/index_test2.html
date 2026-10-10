@@ -100,7 +100,26 @@
                         data-ts="{{ events[key].timeS if key in events else '' }}"
                         data-te="{{ events[key].timeE if key in events else '' }}">
                         {% if d %}
-                            <div class="day">{{ d }}</div>
+                            <div class="day">
+                                {{ d }}
+                            
+                                {% if mode == "childday" 
+                                    and key in events
+                                    and events[key].comment %}
+                                    <span
+                                        title="コメントあり"
+                                        style="
+                                            display: inline-block;
+                                            width: 9px;
+                                            height: 9px;
+                                            background-color: #e53935;
+                                            border-radius: 50%;
+                                            margin-left: 3px;
+                                            vertical-align: middle;
+                                        ">
+                                    </span>
+                                {% endif %}
+                            </div>
                             {% if key in events %}
                                 {% set E = events[key] %}
                                 <div>
@@ -161,11 +180,25 @@
                                 </div>
                             </div>
                         </div>
-                        <!--ここはコメント欄として再利用。最終的には赤い印がつくようにする。-->
+                        
+                        {% if mode == "childday" %}
+                        <div class="field">
+                            <label class="label" for="comment">コメント</label>
+                            <div class="control">
+                                <textarea
+                                    id="comment"
+                                    name="comment"
+                                    class="textarea"
+                                    rows="3"
+                                    maxlength="300"
+                                    placeholder="連絡事項等を自由に入力してください。"></textarea>
+                            </div>
+                        </div>
+                        {% else %}
                         <input type="hidden" id="comment" name="comment">
+                        {% endif %}
 
                         {% if mode == "workday" %}
-
                         <div class="field">
                             <label class="checkbox">
                                 <input type="checkbox" id="triangleCheck">
