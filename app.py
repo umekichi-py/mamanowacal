@@ -736,10 +736,18 @@ def index_get(mode):
     }
     event_bg = bg_map.get(mode, "has-background-success-light")
 
-    #デフォルトは今月（パラメータ取得）
+    #デフォルトは翌月（パラメータ取得）
     now = datetime.now()
-    year = int(request.args.get("year", now.year))
-    month = int(request.args.get("month", now.month))
+
+    if now.month == 12:
+        default_year = now.year + 1
+        default_month = 1
+    else:
+        default_year = now.year
+        default_month = now.month + 1
+        
+    year = int(request.args.get("year", default_year))
+    month = int(request.args.get("month", default_month))
     #入力月の前月を求める
     if month == 1:
         deadline_year = year - 1
@@ -749,8 +757,8 @@ def index_get(mode):
         deadline_year = year
         deadline_month = month - 1
 
-    #23日0:00で締め切り(つまり22日23:59まで入力可能)
-    deadline = datetime(deadline_year, deadline_month, 23, 0, 0)
+    #21日0:00で締め切り(つまり20日23:59まで入力可能)
+    deadline = datetime(deadline_year, deadline_month, 21, 0, 0)
 
     is_closed = now >= deadline
     #日曜始まりのカレンダーを作成
