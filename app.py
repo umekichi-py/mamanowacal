@@ -824,8 +824,8 @@ def index_post(mode):
         deadline_year = year
         deadline_month = month - 1
 
-    #23日0:00で締め切り(つまり22日23:59まで入力可能)
-    deadline = datetime(deadline_year, deadline_month, 23, 0, 0)
+    #21日0:00で締め切り(つまり20日23:59まで入力可能)
+    deadline = datetime(deadline_year, deadline_month, 21, 0, 0)
 
     if now >= deadline:
         flash("締め切りました。", "warning")
