@@ -757,8 +757,8 @@ def index_get(mode):
         deadline_year = year
         deadline_month = month - 1
 
-    #21日0:00で締め切り(つまり20日23:59まで入力可能)
-    deadline = datetime(deadline_year, deadline_month, 21, 0, 0)
+    #23日0:00で締め切り(つまり22日23:59まで入力可能)
+    deadline = datetime(deadline_year, deadline_month, 23, 0, 0)
 
     is_closed = now >= deadline
     #日曜始まりのカレンダーを作成
