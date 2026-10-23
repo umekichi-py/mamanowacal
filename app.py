@@ -758,7 +758,7 @@ def index_get(mode):
         deadline_month = month - 1
 
     #23日0:00で締め切り(つまり22日23:59まで入力可能)
-    deadline = datetime(deadline_year, deadline_month, 23, 0, 0)
+    deadline = datetime(deadline_year, deadline_month, 24, 0, 0)
 
     is_closed = now >= deadline
     #日曜始まりのカレンダーを作成
@@ -825,7 +825,7 @@ def index_post(mode):
         deadline_month = month - 1
 
     #23日0:00で締め切り(つまり22日23:59まで入力可能)
-    deadline = datetime(deadline_year, deadline_month, 23, 0, 0)
+    deadline = datetime(deadline_year, deadline_month, 24, 0, 0)
 
     if now >= deadline:
         flash("締め切りました。", "warning")
